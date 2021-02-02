@@ -8,6 +8,7 @@
 - [EditorConfig](#editorconfig)
 - [@typescript-eslint](#typescript-eslint)
 - [prettier](#prettier)
+- [JSDoc](#jsdoc)
 
 <!-- /TOC -->
 
@@ -246,4 +247,116 @@ Options:
 - `requirePragma`: false
 - `insertPragma`: false
 
+和 eslint, stylelint 配合，eslint-config-prettier, stylelint-config-prettier。    
+
+然后在配置文件中继承，记得要放在数组中的最后一个，以便能够覆盖其他配置：   
+
+```json
+{
+  "extends": [
+    // other configs ...
+    "stylelint-config-prettier"
+  ]
+}
+```     
+
+那基本 prettier 的内容就是这些，剩下的就是和 pre-commit 钩子结合一下了。    
+
+## JSDoc
+
+JSDoc 的注释必须这样开头，`/**` 多了星号也不行。    
+
+安装 `npm i --save-dev jsdoc`。     
+
+用法一般就是 `npx jsdoc file1.js file2.js ...`    
+
+老实说，JSDoc 应该也得用到 AST 吧，而且为了解析新的用法，估计还得用到 babel-parser 吧。    
+
+JSDoc 支持配置文件，json 或者 js 都行。`-c` 命令行指定配置文件。     
+
+默认的配置是这样的：   
+
+```json
+{
+    "plugins": [],
+    "recurseDepth": 10,
+    "source": {
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "sourceType": "module",
+    "tags": {
+        "allowUnknownTags": true,
+        "dictionaries": ["jsdoc","closure"]
+    },
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false
+    }
+}
+```    
+
+CLI 的配置项也能写在配置文件里，不过需要都放在 opts 字段下：    
+
+```json
+{
+    "opts": {
+        "template": "templates/default",  // same as -t templates/default
+        "encoding": "utf8",               // same as -e utf8
+        "destination": "./out/",          // same as -d ./out/
+        "recurse": true,                  // same as -r
+        "tutorials": "path/to/tutorials", // same as -u path/to/tutorials
+    }
+}
+```  
+
+JSDoc 支持两种类型的 tag:   
+
+- block tags: 顶层注释
+- inline tags: 一般是 block tags 中的一部分文本，一般用来链接到文档的其他部分，像个 a 链接    
+
+inline tags 需要放在括号里 `{}`。    
+
+```js
+/**
+ * Set the shoe's color. Use {@link Shoe#setSize} to set the shoe size
+ * 
+ * @param {string} color - The shoe's color
+ */
+Shoe.prototype.setColor = function (color) {
+    // ...
+}
+```     
+
+上面这个是 inline tag 在一段普通的文本中，下面这个是 inline tag 在 block tag 中：   
+
+```js
+/**
+ * Set the shoe's color
+ * 
+ * @param {SHOE_COLORS} color - The shoe color. Must be an enumerated
+ * value of {@link SHOE_COLORS}
+ */
+Shoe.protytype.setColor = function (color) {
+    // ...
+}
+```    
+
+JSDoc 的插件是作用于解析流程的，通过以下三种方式可以影响解析的结果：   
+
+- 定义事件回调
+- 定义 tags
+- 定义 AST 节点的 visitor    
+
+tags 列表，一些不常用的就省略了：    
+
+- `@abstract`
+- `@async`: 一般来说不必明说，会自己侦测
+- `@augments <namepath>` 或者 `@extends <namepath>`: 继承关系
+- `@author <name> [<emailAddress>]`
+- `@class` 或 `@constructor`
+- `@enum [<type>]`
+- `@file` 或 `@fileoverview` 或 `@overview`    
+
+算了，感觉没什么有用的内容。    
 

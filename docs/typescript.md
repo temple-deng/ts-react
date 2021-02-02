@@ -1,5 +1,11 @@
 # TypeScript
 
+<!-- TOC -->
+
+- [TypeScript](#typescript)
+
+<!-- /TOC -->
+
 当把一个对象字面量赋值给一个接口类型的变量时，不能出现接口中没有的字段。   
 
 TS 提供了两种新建类型的语法：Interfaces 和 Types。    
