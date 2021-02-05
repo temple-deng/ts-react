@@ -9,6 +9,12 @@
 - [@typescript-eslint](#typescript-eslint)
 - [prettier](#prettier)
 - [JSDoc](#jsdoc)
+- [eslint](#eslint)
+    - [可共享配置文件](#可共享配置文件)
+    - [注释的用法](#注释的用法)
+    - [Ignoring Code](#ignoring-code)
+- [eslint-config-prettier](#eslint-config-prettier)
+- [@typescript-eslint 项目](#typescript-eslint-项目)
 
 <!-- /TOC -->
 
@@ -360,3 +366,174 @@ tags 列表，一些不常用的就省略了：
 
 算了，感觉没什么有用的内容。    
 
+## eslint
+
+eslint 无法识别 typescript 代码，会报错，所以可能使用 @typescript-eslint 这个项目了。oh，
+烦躁。   
+
+eslint 会在待检测文件同目录下搜索配置文件，以及向上层目录继续搜索，直到找到文件系统顶层或者
+指定了 `root: true` 的配置文件目录。    
+
+shared settings 看起来是为了不同的 rules 提供均可见的数据而添加的，也就是说 setting 中的
+数据，所有 rules 是都可以访问到的。相当于提供了一些除 eslint 官方的配置数据之外的全局变量，方便
+各不同模块访问，不然应该各模块数据相互隔离，拿不到共用的配置项。   
+
+配置文件会级联和 merge。    
+
+在 `extends` 配置中 `eslint-config-` 前缀可以省略。 
+
+### 可共享配置文件
+
+就是一个 npm 包，导出一个配置对象，名字必须是 `eslint-config-name`，scope 包也支持，
+`@scope/eslint-config-name` 或者 `@scope/eslint-config` 都行。     
+
+用的时候可以这样用：   
+
+```json
+{
+    "extends" "@scope/eslint-config",
+    "extends": "@scope",
+    "extends": "@scope/eslint-config-name"
+}
+```     
+
+支持在一个包里导出多个配置。需要创建新的文件。比如说在包里创建一个 `my-special-config.js`
+文件：    
+
+```js
+module.exports = {
+    rules: {
+        quotes: [2, "double"]
+    }
+}
+```    
+
+假设包名是 `eslint-config-myconfig`，你们访问的时候就是:    
+
+```json
+{
+    "extends": "myconfig/my-special-config"
+}
+```    
+
+如果是 scope 包，就是这样引用：   
+
+```json
+{
+    "extends": "@scope/eslint-config/my-special-config"
+}
+```    
+
+注意 scope 包这里好像是不能省略 eslint-config 部分的。也就是得全称。  
+
+eslint 插件也可以导出共享配置。然后 plugins 里面是可以省略 `eslint-plugin-` 前缀。    
+
+如果使用 plugin 的配置的话，要写成这样：   
+
+```json
+{
+    "plugins": [
+        "react"
+    ],
+    "extends": [
+        "eslint:recommend",
+        "plugin:react/recommend"
+    ],
+    "rules": {
+        "react/no-set-state": "off"
+    }
+}
+```     
+
+基本上是这个样子，先是 `plugin:`，然后跟包名，这里可以省略 eslint-plugin 前缀，然后是 `/`，
+最后跟配置名。     
+
+从 4.1 版本开始，提供了更精确配置的方式：    
+
+```json
+{
+  "rules": {
+    "quotes": ["error", "double"]
+  },
+
+  "overrides": [
+    {
+      "files": ["bin/*.js", "lib/*.js"],
+      "excludedFiles": "*.test.js",
+      "rules": {
+        "quotes": ["error", "single"]
+      }
+    }
+  ]
+}
+```     
+
+### 注释的用法
+
+全局变量 `/* global var1, var2 */`。   
+
+禁用规则：    
+
+```js
+/* eslint-disable */
+alert('foo');
+/* eslint-enable */
+```      
+
+```js
+alert('foo'); // eslint-disable-line no-alert
+
+// eslint-disable-next-line no-alert
+alert('foo');
+
+alert('foo'); /* eslint-disable-line no-alert */
+
+/* eslint-disable-next-line no-alert */
+alert('foo');
+```     
+
+### Ignoring Code
+
+`ignorePatterns` 字段，还有 `.eslintignore` 文件。    
+
+## eslint-config-prettier
+
+支持以下的插件：   
+
+- @typescript-eslint/eslint-plugin
+- eslint-plugin-babel
+- eslint-plugin-flowtype
+- eslint-plugin-prettier
+- eslint-plugin-react
+- eslint-plugin-standard
+- eslint-plugin-vue     
+
+要是用了对应插件的话，建议把配置也加上：   
+
+```js
+{
+  "extends": [
+    "some-other-config-you-use",
+    "prettier",
+    "prettier/@typescript-eslint",
+    "prettier/babel",
+    "prettier/flowtype",
+    "prettier/prettier",
+    "prettier/react",
+    "prettier/standard",
+    "prettier/unicorn",
+    "prettier/vue"
+  ]
+}
+```     
+
+## @typescript-eslint 项目
+
+@typescipt-eslint/parser 包，解析 TS 代码然后转换成一个 eslint 可以识别的 AST，更准备的
+说法可能是这样，@typescript-eslint/parser 负责处理 eslint 的配置，然后调用 @typescript-eslint/typescript-estree，
+生成一个 AST，而 @typescript-eslint/typescript-estree 实际上是调用 TS 的编译器去解析 TS
+代码然后生成一个 TS 的 AST，再然后把这个 AST 转换成一个 eslint 认识的 AST。    
+
+这一部分只涉及到了解析，而 rules 部分则是由 plugin 来负责的。    
+
+首先需要明确一点，不是所有的 eslint plugin 和 rules 都可以直接使用。

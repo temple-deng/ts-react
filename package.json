@@ -8,7 +8,10 @@
     "build": "webpack",
     "dev": "export NODE_ENV=development && webpack",
     "serve": "export NODE_ENV=development && webpack serve --open",
-    "type": "tsc"
+    "lint": "tsc && npm run lint:script && npm run lint:style",
+    "lint:script": "eslint './src/' --ext '.js,.jsx,.ts,.tsx'",
+    "lint:style": "stylelint './src/**/*.less'",
+    "pretty": ""
   },
   "keywords": [],
   "author": "",
@@ -32,6 +35,8 @@
     "@babel/preset-typescript": "^7.12.7",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.2",
+    "@typescript-eslint/parser": "^4.14.2",
     "autoprefixer": "^10.2.1",
     "babel-loader": "^8.2.2",
     "css-loader": "^5.0.1",

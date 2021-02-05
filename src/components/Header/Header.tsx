@@ -7,7 +7,7 @@ interface MyProps {
     age: number;
 }
 
-const Header = function (props: MyProps = {name: 'temple', age: 29}) {
+const Header = (props: MyProps = {name: 'temple', age: 29}): JSX.Element => {
     return (
         <header>
             <div>

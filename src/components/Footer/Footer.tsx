@@ -14,7 +14,7 @@ class Footer extends Component<ClassProps> {
         super(props);
     }
 
-    render() {
+    render(): JSX.Element {
         const {name, gender} = this.props;
         return (
             <>
