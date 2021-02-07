@@ -11,7 +11,7 @@
     "lint": "tsc && npm run lint:script && npm run lint:style",
     "lint:script": "eslint './src/' --ext '.js,.jsx,.ts,.tsx'",
     "lint:style": "stylelint './src/**/*.less'",
-    "pretty": ""
+    "pretty": "prettier --write ./src"
   },
   "keywords": [],
   "author": "",

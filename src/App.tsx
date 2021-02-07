@@ -4,17 +4,14 @@ import Footer from './components/Footer/Footer';
 import './App.less';
 
 function App() {
-    const title = 'Hello, World!';
-    return (
-        <div className="wrapper">
-            <div>{title}</div>
-            <Header name="temple" age={12} />
-            <Footer name="hhhh" />
-        </div>
-    );
+  const title = 'Hello, World!';
+  return (
+    <div className="wrapper">
+      <div>{title}</div>
+      <Header name="temple" age={12} />
+      <Footer name="hhhh" />
+    </div>
+  );
 }
 
-ReactDOM.render(
-    <App />,
-    document.getElementById('root')
-);
+ReactDOM.render(<App />, document.getElementById('root'));
