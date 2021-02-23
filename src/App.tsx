@@ -4,7 +4,7 @@ import Footer from './components/Footer/Footer';
 import './App.less';
 
 function App() {
-  const title = 'Hello, World!';
+  const title = 'Hello1, World!';
   return (
     <div className="wrapper">
       <div>{title}</div>

@@ -3,6 +3,13 @@
 <!-- TOC -->
 
 - [TypeScript](#typescript)
+    - [Handbook v2](#handbook-v2)
+        - [Everyday Types](#everyday-types)
+        - [Narrowing](#narrowing)
+        - [More on Functions](#more-on-functions)
+        - [Object Types](#object-types)
+        - [Type Manipulation](#type-manipulation)
+        - [Class](#class)
 
 <!-- /TOC -->
 
@@ -196,7 +203,7 @@ export const myField: number;
 
 类型只有在存在一个同名的类型别名声明的时候，才会出现冲突。    
 
-注意，namespace 永远不会冲突，即便了 type alias。    
+注意，namespace 永远不会冲突，即便有 type alias。    
 
 ```ts
 class C {}
@@ -213,4 +220,319 @@ https://zhuanlan.zhihu.com/p/133344957
 
 
 react, webpack, babel, typescript, eslint, postcss, stylelint, prettier,
-jsdoc, test
+jsdoc, test    
+
+## Handbook v2
+
+### Everyday Types
+
+interface 里面的属性分隔符可以用 `,` 或 `;`，最后一个分隔符是可选的，然后 type 里面的感觉应该
+也是这样。    
+
+非 null 断言运算符：   
+
+```ts
+function liveDangerously(x?: number | undefined) {
+  // No error
+  console.log(x!.toFixed());
+}
+```     
+
+在任意一个表达式后面跟一个 `!` 都表示这是一个非 `null` 和 `undefined` 的值的断言。   
+
+### Narrowing
+
+```js
+typeof padding === 'number'
+```    
+
+类似这样的代码，可以看作是 type guard。TS 可以根据我们的执行路径判断出值更精确的类型。    
+
+### More on Functions
+
+构造函数的签名：    
+
+```ts
+type SomeConstructor = {
+  new (s: string): SomeObject;
+}
+```    
+
+泛型约束：   
+
+```ts
+function longest<T extends { length: number }>(a: T, b: T) {
+  if (a.length > b.length) {
+    return a;
+  } else {
+    return b;
+  }
+}
+```    
+
+```ts
+function minimumLength<T extends { length: number }>(
+    obj: T,
+    minimum: number
+): T {
+    if (obj.length >= minimum) {
+        return obj;
+    } else {
+        return { length: minimum };
+    // Type '{ length: number; }' is not assignable to type 'T'.
+      // '{ length: number; }' i assignable to the constraint of type 'T', but 'T' could be instantiated with a different subtype of constraint '{ length: number; }'.
+    }
+}
+```     
+
+意思是虽然 `{length: number}` 对于泛型的约束是可赋值的，但是呢，类型 T 却是可以包含其他的属性的，
+那这种时候就容易引发 bug。    
+
+### Object Types
+
+当检查两个类型是否是兼容的时候，TS 不会考虑这两个类型的属性是否是只读的。所以，即便是 readonly
+的属性也可能是可以通过别名修改的。     
+
+```ts
+interface Person {
+  name: string;
+  age: number;
+}
+
+interface ReadonlyPerson {
+  readonly name: string;
+  readonly age: number;
+}
+
+let writablePerson: Person = {
+  name: "Person McPersonface",
+  age: 42,
+};
+
+// works
+let readonlyPerson: ReadonlyPerson = writablePerson;
+
+console.log(readonlyPerson.age); // prints '42'
+writablePerson.age++;
+console.log(readonlyPerson.age); // prints '43'
+```    
+
+### Type Manipulation
+
+TS 支持使用其他的类型来表示一种新的类型，通过众多的类型运算符，我们可以使用已存的类型和值来表示
+新的类型。    
+
+`keyof` 运算符接受一个对象类型作参数，然后生成这个对象键名组成的字符串或者数字的 union 类型。    
+
+```ts
+type Point = {
+    x: number;
+    y: number;
+};
+
+type P = keyof Point;
+//   type P = "x" | "y"
+```     
+
+JS本身有一个 `typeof` 运算符了，我们可以用在表达式中。    
+
+同时 TS 也加了一个 `typeof` 运算符，不过是用来类型上下文中，用来引用一个变量或属性的类型。    
+
+```ts
+let s = "hello";
+let n: typeof s;
+// let n: string
+```     
+
+Indexed Access Types 用来查询另一个类型上的属性：    
+
+```ts
+type Person = {
+    age: number;
+    name: string;
+    alive: boolean;
+};
+
+type Age = Person["age"];
+// type Age = number;
+```     
+
+```ts
+type Person = {
+    age: number;
+    name: string;
+    alive: boolean;
+};
+
+type I1 = Person["age" | "name"];
+// type I1 = string | number;
+
+type I2 = Person[keyof Person];
+// type I2 = string | number | boolean
+
+type AliveOrName = 'alive' | 'name';
+type I3 = Person[AliveOrName];
+// type I3 = string | boolean
+```     
+
+Conditional Types     
+
+```ts
+interface Animal {
+    live(): void;
+}
+
+interface Dog extends Animal {
+    woof(): void;
+}
+
+type Example1 = Dog extends Animal ? number : string;
+// type Example1 = number;
+
+type Example2 = RegExp extends Animal ? number : string;
+// type Example2 = string;
+```     
+
+格式差不多是这样的：    
+
+```ts
+SomeType extends OtherType ? TrueType : FalseType;
+```      
+
+```ts
+type MessageOf<T> = T extends { message: unknown } ? T["message"] : never;
+```    
+
+Mapped Types     
+
+```ts
+type OptionsFlags<Type> = {
+  [Property in keyof Type]: boolean;
+}
+```    
+
+mapped type 是一直泛型类型，通过使用依赖 keyof 生成的 union 来迭代一个类型的键名然后生成另一个类型。    
+
+上面这个类型的意思是把 Type 中的所有属性都挑出来，然后将值设为 boolean 类型。    
+
+在进行 map 的时候还有 readonly 和 `?` 声明符可以进行操作。可以通过前缀 `+` 或 `-` 来添加
+或移出这两个声明符。     
+
+```ts
+// Removes 'readonly' attributes from a type's properties
+type CreateMutable<Type> = {
+    -readonly [Property in keyof Type]: Type[Property];
+}
+
+type LockedAccount = {
+    readonly id: number;
+    readonly name: string;
+};
+
+type UnlockedAccount = CreateMutable<LockedAccount>;
+// type UnlockedAccount = {
+//      id: number;
+//      name: string;    
+// }
+```     
+
+```ts
+// Removes 'optional' attributes from a type's properties
+type Concrete<Type> = {
+    [Property in keyof Type]-?: Type[Property];
+}
+```    
+
+### Class
+
+关于 implements 有一些需要注意的点，首先 implements 一个带有可选属性的接口并不会创建对应的属性：    
+
+```ts
+interface A {
+    x: number;
+    y?: number;
+}
+
+class C implements A {
+    x = 0;
+}
+
+const c = new C();
+c.y = 10;
+// Property 'y' does not exist on the 'C'
+```     
+
+某些情况下 JS 类初始化的顺序是让人惊讶的：    
+
+```ts
+class Base {
+    name = "base";
+
+    constructor() {
+        console.log('My name is ' + this.name);
+    }
+}
+
+class Derived extends Base {
+    name = "derived";
+}
+
+// Prints 'base', not 'derived'
+const d = new Derived();
+```      
+
+这个东西仔细看其实应该是合理的，肯定是先处理基类的逻辑。    
+
+- 先初始化基类的字段
+- 然后执行基类的构造函数
+- 初始化派生类的字段
+- 执行派生类的构造函数     
+
+派生类是可以将一个 protected 的基类属性转换为 public 的，我们在使用的时候应该注意这种不经意
+的转换：    
+
+```ts
+class Base {
+    protected m = 10;
+}
+
+class Derived extends Base {
+    // No modifier, so default is 'public'
+    m = 15;
+}
+
+const d = new Derived();
+console.log(d.m); // OK
+```     
+
+由于 private 属性对派生类是不可见的，因此它也不能增加其可见度。   
+
+TS 允许跨实例对 private 属性的访问：    
+
+```ts
+class A {
+    private x = 10;
+
+    public sameAs(other: A) {
+        // No error
+        return other.x === this.x;
+    }
+}
+```     
+
+类的静态属性也可以使用 pubilc 之类的访问控制符。   
+
+静态成员也可以继承：    
+
+```ts
+class Base {
+  static getGreeting() {
+    return "Hello world!";
+  }
+}
+
+class Derived extends Base {
+  myGreeting = Derived.getGreeting();
+}
+```     
+

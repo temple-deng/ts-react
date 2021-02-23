@@ -1,5 +1,12 @@
 # Project Configuration
 
+<!-- TOC -->
+
+- [Project Configuration](#project-configuration)
+    - [Project References](#project-references)
+
+<!-- /TOC -->
+
 ## Project References
 
 tsconfig.json 新加了一个顶层配置项 `references`，一个对象数组，声明该项目的引用的其他项目。   
