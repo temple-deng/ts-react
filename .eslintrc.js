@@ -40,6 +40,12 @@ module.exports = {
         'react/react-in-jsx-scope': 'off',
         'eqeqeq': ['error', 'always', {'null': 'ignore'}],
         'max-len': ['error', 80],
-        'comma-dangle': ['error', 'only-multiline']
+        'comma-dangle': ['error', 'only-multiline'],
+        '@typescript-eslint/explicit-module-boundary-types': [
+            'off',
+            {
+              'allowedNames': ['render']
+            }
+        ]
     }
 };
