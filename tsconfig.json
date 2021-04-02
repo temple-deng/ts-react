@@ -10,5 +10,5 @@
         "moduleResolution": "node",
         "noEmit": true
     },
-    "include": ["src/**/*.tsx"]
+    "include": ["src/**/*.tsx", "src/components/Footer/__tests__/Footer.test.ts"]
 }

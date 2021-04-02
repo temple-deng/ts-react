@@ -1,7 +1,14 @@
-import React, {Component} from 'react';
+import React, {ChangeEvent, Component, FormEvent} from 'react';
 
-class FocusInput extends Component {
+type FocusInputState = {
+  value: string;
+};
+
+class FocusInput extends Component<unknown, FocusInputState> {
   myRef = React.createRef<HTMLInputElement>();
+  state: FocusInputState = {
+    value: '222',
+  };
 
   handleClick = () => {
     if (this.myRef.current) {
@@ -10,10 +17,21 @@ class FocusInput extends Component {
     }
   };
 
+  handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      value: e.target.value,
+    });
+  }
+
   render() {
     return (
       <>
-        <input type="text" ref={this.myRef} />
+        <input
+          type="text"
+          ref={this.myRef}
+          value={this.state.value}
+          onChange={this.handleChange}
+        />
         <input type="button" value="Focus" onClick={this.handleClick} />
       </>
     );

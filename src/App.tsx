@@ -13,6 +13,10 @@ import FocusInput from './components/FocusInput/FocusInput';
 import RefForward from './components/RefForward/RefForward';
 import Optimize from './components/Optimize/Optimize';
 import ThemeContext from './contexts/ThemeContext';
+import Modal, {Child} from './components/Modal/Modal';
+import Effect from "./components/Effect/Effect";
+import EffectWithClean from "./components/Effect/EffectWithClean";
+import Counter from './components/Effect/Counter';
 import './App.less';
 
 const LazyComponent = React.lazy(
@@ -27,6 +31,11 @@ function App() {
     setTheme(theme === 'light' ? 'dark' : 'light');
     // setCount(count + 1);
   };
+
+  const handleModalClick = () => {
+    console.log('modal click')
+  };
+
 
   console.log('app render');
 
@@ -43,7 +52,7 @@ function App() {
           <LazyComponent />
         </Suspense>
       </div>
-      <div onClick={handleClick}>Click me</div>
+      <div onClick={handleClick}>1Click me2</div>
       <div>
         <ThemeContext.Provider value={theme}>
           <ThemeText />
@@ -68,6 +77,23 @@ function App() {
       <div>
         <Optimize count={count} />
       </div>
+
+      <div onClick={handleModalClick}>
+        <div>123333</div>
+        <Modal>
+          <Child />
+        </Modal>
+      </div>
+
+      <Effect />
+
+      <EffectWithClean theme={theme} />
+
+      <div style={{
+        borderBottom: '1px solid #eee'
+      }}></div>
+
+      <Counter />
     </>
   );
 }
