@@ -16,14 +16,14 @@ afterEach(() => {
   container = null;
 });
 
-it("renders with or without gender", () => {
+it.skip("renders with or without gender", () => {
   act(() => {
     render(<Footer name="temple" />, container);
   });
   expect(container.textContent).toBe("name: temple");
 });
 
-it('renders correctly', () => {
+it.skip('renders correctly', () => {
   const tree = renderer
     .create(<Footer name="temple" />)
     .toJSON();

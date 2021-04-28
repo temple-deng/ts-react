@@ -2,10 +2,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 
 import FocusInput from "../FocusInput";
 
-describe('focus input', () => {
+describe.skip('focus input', () => {
   test('render focus input', () => {
     render(<FocusInput />);
-    screen.debug();
+    // screen.debug();
 
     fireEvent.change(screen.getByRole('textbox'), {
       target: {
@@ -13,7 +13,7 @@ describe('focus input', () => {
       }
     });
 
-    screen.debug();
+    // screen.debug();
   });
 });
 
