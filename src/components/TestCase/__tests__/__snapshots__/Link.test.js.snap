@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`link render 1`] = `
+<a
+  href="https://www.qq.com"
+>
+  Facebook
+</a>
+`;
